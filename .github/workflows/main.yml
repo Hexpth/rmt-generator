@@ -2,7 +2,6 @@ name: Sync to Hugging Face hub
 on:
   push:
     branches: [main]
-  # to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -13,7 +12,17 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Push to hub
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push https://Hexpth:$HF_TOKEN@huggingface.co/spaces/Hexpth/rmt-generator main
+
+      - name: Configure git user
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Add Hugging Face remote
+        run: git remote add hf https://Hexpth:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Hexpth/rmt-generator
+
+      - name: Pull from Hugging Face Space
+        run: git pull hf main --rebase
+
+      - name: Push to Hugging Face Space
+        run: git push hf main
