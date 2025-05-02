@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Matrix Theory Cookbook</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 2px;
+        }
+        .matrix-cell {
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            font-family: monospace;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .floating-matrix {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+    <!-- Floating matrix decoration -->
+    <div class="floating-matrix hidden md:block">
+        <div class="matrix-grid w-32 h-32 bg-white shadow-lg rounded-lg p-2">
+            <div class="matrix-cell">0.12</div>
+            <div class="matrix-cell">-0.45</div>
+            <div class="matrix-cell">0.78</div>
+            <div class="matrix-cell">0.12</div>
+            <div class="matrix-cell">-0.45</div>
+            <div class="matrix-cell">0.78</div>
+            <div class="matrix-cell">0.12</div>
+            <div class="matrix-cell">-0.45</div>
+            <div class="matrix-cell">0.78</div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-indigo-800 mb-4">Random Matrix Theory Cookbook</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                A practical guide to working with random matrices, their properties, and applications
+            </p>
+            <div class="mt-6 flex justify-center space-x-4">
+                <span class="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium">Linear Algebra</span>
+                <span class="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium">Probability</span>
+                <span class="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium">Statistics</span>
+            </div>
+        </header>
+
+        <!-- Introduction -->
+        <section class="mb-16 bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
+                    <i class="fas fa-asterisk mr-3 text-indigo-500"></i> Introduction to Random Matrix Theory
+                </h2>
+                <div class="prose max-w-none text-gray-700">
+                    <p>Random Matrix Theory (RMT) studies the properties of matrices whose entries are random variables. It has found applications in:</p>
+                    <ul class="list-disc pl-6 space-y-1 mt-2">
+                        <li>Nuclear physics (energy levels of heavy nuclei)</li>
+                        <li>Wireless communications (modeling MIMO channels)</li>
+                        <li>Financial mathematics (correlation matrices)</li>
+                        <li>Machine learning (neural network initialization)</li>
+                        <li>Statistical physics (disordered systems)</li>
+                    </ul>
+                    
+                    <div class="mt-6 p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+                        <h3 class="font-semibold text-indigo-800 mb-2">Key Concept:</h3>
+                        <p>The <strong>Wigner's Semicircle Law</strong> states that the eigenvalues of a large symmetric random matrix with independent entries (up to symmetry) are distributed according to a semicircular distribution.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Matrix Types Section -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6 flex items-center">
+                <i class="fas fa-th mr-3 text-indigo-500"></i> Common Random Matrix Types
+            </h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Gaussian Orthogonal Ensemble -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-random text-indigo-600"></i>
+                            </div>
+                            <h3 class="font-bold text-lg">GOE</h3>
+                        </div>
+                        <p class="text-gray-600 mb-4">Gaussian Orthogonal Ensemble - Real symmetric matrices with Gaussian entries</p>
+                        <div class="matrix-grid mb-4">
+                            <div class="matrix-cell">1.2</div>
+                            <div class="matrix-cell">0.5</div>
+                            <div class="matrix-cell">-0.3</div>
+                            <div class="matrix-cell">0.5</div>
+                            <div class="matrix-cell">0.8</div>
+                            <div class="matrix-cell">0.1</div>
+                            <div class="matrix-cell">-0.3</div>
+                            <div class="matrix-cell">0.1</div>
+                            <div class="matrix-cell">1.0</div>
+                        </div>
+                        <button onclick="generateMatrix('GOE')" class="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded transition-colors">
+                            Generate Example
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Gaussian Unitary Ensemble -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-infinity text-indigo-600"></i>
+                            </div>
+                            <h3 class="font-bold text-lg">GUE</h3>
+                        </div>
+                        <p class="text-gray-600 mb-4">Gaussian Unitary Ensemble - Complex Hermitian matrices with Gaussian entries</p>
+                        <div class="matrix-grid mb-4">
+                            <div class="matrix-cell">1.2+0i</div>
+                            <div class="matrix-cell">0.3-0.5i</div>
+                            <div class="matrix-cell">-0.1+0.2i</div>
+                            <div class="matrix-cell">0.3+0.5i</div>
+                            <div class="matrix-cell">0.8+0i</div>
+                            <div class="matrix-cell">0.4-0.3i</div>
+                            <div class="matrix-cell">-0.1-0.2i</div>
+                            <div class="matrix-cell">0.4+0.3i</div>
+                            <div class="matrix-cell">1.0+0i</div>
+                        </div>
+                        <button onclick="generateMatrix('GUE')" class="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded transition-colors">
+                            Generate Example
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Wishart Matrices -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-chart-bar text-indigo-600"></i>
+                            </div>
+                            <h3 class="font-bold text-lg">Wishart</h3>
+                        </div>
+                        <p class="text-gray-600 mb-4">Wishart matrices - XXᵀ where X is n×p with i.i.d. Gaussian entries</p>
+                        <div class="matrix-grid mb-4">
+                            <div class="matrix-cell">2.1</div>
+                            <div class="matrix-cell">0.7</div>
+                            <div class="matrix-cell">1.2</div>
+                            <div class="matrix-cell">0.7</div>
+                            <div class="matrix-cell">1.8</div>
+                            <div class="matrix-cell">0.9</div>
+                            <div class="matrix-cell">1.2</div>
+                            <div class="matrix-cell">0.9</div>
+                            <div class="matrix-cell">2.5</div>
+                        </div>
+                        <button onclick="generateMatrix('Wishart')" class="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded transition-colors">
+                            Generate Example
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Eigenvalue Distributions -->
+        <section class="mb-16 bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-indigo-700 mb-6 flex items-center">
+                    <i class="fas fa-chart-line mr-3 text-indigo-500"></i> Eigenvalue Distributions
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Wigner's Semicircle Law</h3>
+                        <p class="text-gray-600 mb-4">
+                            For large N×N symmetric random matrices with independent entries (up to symmetry), the eigenvalue density converges to:
+                        </p>
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <p class="font-mono text-indigo-700">ρ(λ) = (1/2π)√(4 - λ²) for |λ| ≤ 2</p>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="semicircleChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Marchenko-Pastur Law</h3>
+                        <p class="text-gray-600 mb-4">
+                            For Wishart matrices XXᵀ where X is n×p with i.i.d. entries, as n,p → ∞ with n/p → γ ∈ (0,∞), the eigenvalue density is:
+                        </p>
+                        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <p class="font-mono text-indigo-700">ρ(λ) = (1/2πγλ)√((λ₊ - λ)(λ - λ₋))</p>
+                            <p class="text-sm text-gray-500 mt-1">where λ₊ = (1 + √γ)², λ₋ = (1 - √γ)²</p>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="marchenkoChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Applications Section -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6 flex items-center">
+                <i class="fas fa-lightbulb mr-3 text-indigo-500"></i> Practical Applications
+            </h2>
+            
+            <div class="space-y-6">
+                <!-- Finance Application -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-6 md:p-8">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-indigo-100 p-3 rounded-lg mr-4">
+                                <i class="fas fa-chart-pie text-indigo-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2 text-gray-800">Financial Correlation Matrices</h3>
+                                <p class="text-gray-600">
+                                    RMT helps distinguish true correlations from random noise in financial data. The eigenvalues of empirical correlation matrices can be compared to those from random matrices to identify meaningful economic information.
+                                </p>
+                                <div class="mt-4">
+                                    <button onclick="showFinanceExample()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 py-2 px-4 rounded transition-colors">
+                                        Show Example Analysis
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Wireless Communication -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-6 md:p-8">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 bg-indigo-100 p-3 rounded-lg mr-4">
+                                <i class="fas fa-wifi text-indigo-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2 text-gray-800">MIMO Wireless Systems</h3>
+                                <p class="text-gray-600">
+                                    In multiple-input multiple-output (MIMO) systems, the channel matrix between transmitters and receivers can be modeled as a random matrix. RMT provides insights into channel capacity and optimal signal processing techniques.
+                                </p>
+                                <div class="mt-4">
+                                    <button onclick="showMIMOExample()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 py-2 px-4 rounded transition-colors">
+                                        Show Channel Matrix
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Matrix Generator -->
+        <section class="mb-16 bg-indigo-50 rounded-xl shadow-md overflow-hidden">
+            <div class="p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-indigo-800 mb-6 flex items-center">
+                    <i class="fas fa-sliders-h mr-3 text-indigo-600"></i> Interactive Matrix Generator
+                </h2>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="font-semibold mb-4 text-gray-800">Matrix Parameters</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Matrix Type</label>
+                                <select id="matrixType" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="GOE">Gaussian Orthogonal (GOE)</option>
+                                    <option value="GUE">Gaussian Unitary (GUE)</option>
+                                    <option value="Wishart">Wishart</option>
+                                    <option value="Bernoulli">Bernoulli (±1)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Size (n×n)</label>
+                                <input type="number" id="matrixSize" min="2" max="10" value="3" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Variance</label>
+                                <input type="number" id="matrixVariance" min="0.1" max="2" step="0.1" value="1" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <button onclick="generateCustomMatrix()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded transition-colors">
+                                Generate Matrix
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="font-semibold mb-4 text-gray-800">Generated Matrix</h3>
+                        <div id="customMatrixContainer" class="matrix-grid mb-4" style="grid-template-columns: repeat(3, minmax(40px, 1fr));">
+                            <!-- Matrix will be generated here -->
+                            <div class="matrix-cell">0.00</div>
+                            <div class="matrix-cell">0.00</div>
+                            <div class="matrix-cell">0.00</div>
+                            <div class="matrix-cell">0.00</div>
+                            <div class="matrix-cell">0.00</div>
+                            <div class="matrix-cell">0.00</div>
+                            <div class="matrix-cell">0.00</div>
+                            <div class="matrix-cell">0.00</div>
+                            <div class="matrix-cell">0.00</div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="font-medium mb-2 text-gray-800">Matrix Properties</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-gray-50 p-3 rounded">
+                                    <p class="text-sm text-gray-500">Trace</p>
+                                    <p id="matrixTrace" class="font-mono">0.00</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded">
+                                    <p class="text-sm text-gray-500">Determinant</p>
+                                    <p id="matrixDet" class="font-mono">0.00</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded">
+                                    <p class="text-sm text-gray-500">Frobenius Norm</p>
+                                    <p id="matrixNorm" class="font-mono">0.00</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded">
+                                    <p class="text-sm text-gray-500">Condition Number</p>
+                                    <p id="matrixCond" class="font-mono">0.00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- References -->
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6 flex items-center">
+                <i class="fas fa-book mr-3 text-indigo-500"></i> Further Reading
+            </h2>
+            
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-6">
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-bookmark text-indigo-500 mt-1 mr-3"></i>
+                            <div>
+                                <p class="font-medium">"Random Matrix Theory" by G. Livan, M. Novaes, and P. Vivo</p>
+                                <p class="text-sm text-gray-500">A modern introduction to RMT with applications</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-bookmark text-indigo-500 mt-1 mr-3"></i>
+                            <div>
+                                <p class="font-medium">"An Introduction to Random Matrices" by G. W. Anderson, A. Guionnet, and O. Zeitouni</p>
+                                <p class="text-sm text-gray-500">Rigorous mathematical treatment of RMT</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-bookmark text-indigo-500 mt-1 mr-3"></i>
+                            <div>
+                                <p class="font-medium">"A First Course in Random Matrix Theory" by M. L. Mehta</p>
+                                <p class="text-sm text-gray-500">Classic text with focus on physics applications</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-gray-600 py-8 border-t border-gray-200">
+    <p>Random Matrix Theory Cookbook © 2023 | Created with <i class="fas fa-heart text-red-500"></i> for mathematics</p>
+    <div class="mt-4 flex justify-center space-x-4">
+        <a href="https://github.com/Hexpth" class="text-indigo-600 hover:text-indigo-800" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
+       </div>
+</footer>
+
+
+    </div>
+
+    <!-- Modal for examples -->
+    <div id="exampleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="modalTitle" class="text-xl font-bold text-indigo-800"></h3>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="modalContent" class="prose max-w-none">
+                    <!-- Content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wigner's semicircle law chart
+            const semicircleCtx = document.getElementById('semicircleChart').getContext('2d');
+            const semicircleChart = new Chart(semicircleCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 201}, (_, i) => -2 + i * 0.02),
+                    datasets: [{
+                        label: 'Eigenvalue Density',
+                        data: Array.from({length: 201}, (_, i) => {
+                            const x = -2 + i * 0.02;
+                            return Math.abs(x) <= 2 ? (1/(2*Math.PI))*Math.sqrt(4 - x*x) : 0;
+                        }),
+                        borderColor: 'rgb(79, 70, 229)',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Density: ${context.parsed.y.toFixed(4)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Eigenvalue (λ)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Density ρ(λ)'
+                            },
+                            min: 0
+                        }
+                    }
+                }
+            });
+
+            // Marchenko-Pastur law chart (γ = 0.5)
+            const marchenkoCtx = document.getElementById('marchenkoChart').getContext('2d');
+            const gamma = 0.5;
+            const lambdaPlus = Math.pow(1 + Math.sqrt(gamma), 2);
+            const lambdaMinus = Math.pow(1 - Math.sqrt(gamma), 2);
+            
+            const marchenkoChart = new Chart(marchenkoCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 201}, (_, i) => lambdaMinus + i * (lambdaPlus - lambdaMinus)/200),
+                    datasets: [{
+                        label: 'Eigenvalue Density',
+                        data: Array.from({length: 201}, (_, i) => {
+                            const lambda = lambdaMinus + i * (lambdaPlus - lambdaMinus)/200;
+                            return (lambda >= lambdaMinus && lambda <= lambdaPlus) ? 
+                                (1/(2*Math.PI*gamma*lambda))*Math.sqrt((lambdaPlus - lambda)*(lambda - lambdaMinus)) : 0;
+                        }),
+                        borderColor: 'rgb(79, 70, 229)',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Density: ${context.parsed.y.toFixed(4)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Eigenvalue (λ)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Density ρ(λ)'
+                            },
+                            min: 0
+                        }
+                    }
+                }
+            });
+        });
+
+        // Matrix generation functions
+        function generateMatrix(type) {
+            let matrix = [];
+            const size = 3;
+            
+            switch(type) {
+                case 'GOE':
+                    for(let i = 0; i < size; i++) {
+                        matrix[i] = [];
+                        for(let j = 0; j < size; j++) {
+                            if(j < i) {
+                                matrix[i][j] = matrix[j][i]; // Symmetric
+                            } else {
+                                matrix[i][j] = (Math.random() * 2 - 1).toFixed(2);
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'GUE':
+                    for(let i = 0; i < size; i++) {
+                        matrix[i] = [];
+                        for(let j = 0; j < size; j++) {
+                            if(j < i) {
+                                // Complex conjugate of lower triangle
+                                const val = matrix[j][i].split('+');
+                                if(val.length > 1) {
+                                    matrix[i][j] = val[0] + '-' + val[1];
+                                } else {
+                                    const val2 = matrix[j][i].split('-');
+                                    if(val2.length > 1) {
+                                        matrix[i][j] = val2[0] + '+' + val2[1];
+                                    } else {
+                                        matrix[i][j] = matrix[j][i] + '+0i';
+                                    }
+                                }
+                            } else {
+                                const real = (Math.random() * 2 - 1).toFixed(1);
+                                const imag = (Math.random() * 2 - 1).toFixed(1);
+                                matrix[i][j] = real + (imag >= 0 ? '+' : '') + imag + 'i';
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'Wishart':
+                    // First create a rectangular matrix
+                    const X = [];
+                    for(let i = 0; i < size; i++) {
+                        X[i] = [];
+                        for(let j = 0; j < size; j++) {
+                            X[i][j] = (Math.random() * 2 - 1).toFixed(1);
+                        }
+                    }
+                    // Then compute X*X^T
+                    for(let i = 0; i < size; i++) {
+                        matrix[i] = [];
+                        for(let j = 0; j < size; j++) {
+                            let sum = 0;
+                            for(let k = 0; k < size; k++) {
+                                sum += X[i][k] * X[j][k];
+                            }
+                            matrix[i][j] = sum.toFixed(1);
+                        }
+                    }
+                    break;
+            }
+            
+            // Display the matrix
+            const container = document.querySelector(`.matrix-grid`);
+            container.innerHTML = '';
+            
+            for(let i = 0; i < size; i++) {
+                for(let j = 0; j < size; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.textContent = matrix[i][j];
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        // Custom matrix generator
+        function generateCustomMatrix() {
+            const type = document.getElementById('matrixType').value;
+            const size = parseInt(document.getElementById('matrixSize').value);
+            const variance = parseFloat(document.getElementById('matrixVariance').value);
+            
+            let matrix = [];
+            const sqrtVar = Math.sqrt(variance);
+            
+            switch(type) {
+                case 'GOE':
+                    for(let i = 0; i < size; i++) {
+                        matrix[i] = [];
+                        for(let j = 0; j < size; j++) {
+                            if(j < i) {
+                                matrix[i][j] = matrix[j][i]; // Symmetric
+                            } else {
+                                matrix[i][j] = sqrtVar * (Math.random() * 2 - 1);
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'GUE':
+                    for(let i = 0; i < size; i++) {
+                        matrix[i] = [];
+                        for(let j = 0; j < size; j++) {
+                            if(j < i) {
+                                // Complex conjugate of lower triangle
+                                matrix[i][j] = { 
+                                    real: matrix[j][i].real, 
+                                    imag: -matrix[j][i].imag 
+                                };
+                            } else {
+                                matrix[i][j] = { 
+                                    real: sqrtVar * (Math.random() * 2 - 1),
+                                    imag: sqrtVar * (Math.random() * 2 - 1)
+                                };
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'Wishart':
+                    // First create a rectangular matrix
+                    const X = [];
+                    for(let i = 0; i < size; i++) {
+                        X[i] = [];
+                        for(let j = 0; j < size; j++) {
+                            X[i][j] = sqrtVar * (Math.random() * 2 - 1);
+                        }
+                    }
+                    // Then compute X*X^T
+                    for(let i = 0; i < size; i++) {
+                        matrix[i] = [];
+                        for(let j = 0; j < size; j++) {
+                            let sum = 0;
+                            for(let k = 0; k < size; k++) {
+                                sum += X[i][k] * X[j][k];
+                            }
+                            matrix[i][j] = sum;
+                        }
+                    }
+                    break;
+                    
+                case 'Bernoulli':
+                    for(let i = 0; i < size; i++) {
+                        matrix[i] = [];
+                        for(let j = 0; j < size; j++) {
+                            matrix[i][j] = Math.random() < 0.5 ? -1 : 1;
+                        }
+                    }
+                    break;
+            }
+            
+            // Display the matrix
+            const container = document.getElementById('customMatrixContainer');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${size}, minmax(40px, 1fr))`;
+            
+            for(let i = 0; i < size; i++) {
+                for(let j = 0; j < size; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    
+                    if(type === 'GUE') {
+                        const real = matrix[i][j].real.toFixed(2);
+                        const imag = matrix[i][j].imag.toFixed(2);
+                        cell.textContent = real + (imag >= 0 ? '+' : '') + imag + 'i';
+                    } else {
+                        cell.textContent = matrix[i][j].toFixed(2);
+                    }
+                    
+                    container.appendChild(cell);
+                }
+            }
+            
+            // Compute and display properties
+            if(type === 'GUE') {
+                // For complex matrices, skip property calculations for simplicity
+                document.getElementById('matrixTrace').textContent = 'Complex';
+                document.getElementById('matrixDet').textContent = 'Complex';
+                document.getElementById('matrixNorm').textContent = 'Complex';
+                document.getElementById('matrixCond').textContent = 'Complex';
+            } else {
+                // Compute trace
+                let trace = 0;
+                for(let i = 0; i < size; i++) {
+                    trace += matrix[i][i];
+                }
+                document.getElementById('matrixTrace').textContent = trace.toFixed(4);
+                
+                // Compute Frobenius norm
+                let norm = 0;
+                for(let i = 0; i < size; i++) {
+                    for(let j = 0; j < size; j++) {
+                        norm += matrix[i][j] * matrix[i][j];
+                    }
+                }
+                norm = Math.sqrt(norm);
+                document.getElementById('matrixNorm').textContent = norm.toFixed(4);
+                
+                // Compute determinant (for small matrices)
+                if (size === 1){
+                  det = matrix[0][0]
+                  document.getElementById('matrixDet').textContent = det.toFixed(4);
+                }
+                else if(size === 2) {
+                    const det = matrix[0][0]*matrix[1][1] - matrix[0][1]*matrix[1][0];
+                    document.getElementById('matrixDet').textContent = det.toFixed(4);
+                } else if(size === 3) {
+                    const det = matrix[0][0]*(matrix[1][1]*matrix[2][2] - matrix[1][2]*matrix[2][1]) -
+                                matrix[0][1]*(matrix[1][0]*matrix[2][2] - matrix[1][2]*matrix[2][0]) +
+                                matrix[0][2]*(matrix[1][0]*matrix[2][1] - matrix[1][1]*matrix[2][0]);
+                    document.getElementById('matrixDet').textContent = det.toFixed(4);
+                } else {
+                    document.getElementById('matrixDet').textContent = 'N/A';
+                }
+                
+                // Condition number (simplified)
+                if(size <= 10) {
+                    // For simplicity, just use ratio of max to min singular value approximation
+                    let maxSV = 0;
+                    let minSV = Infinity;
+                    
+                    // Very rough approximation for demo purposes
+                    for(let i = 0; i < size; i++) {
+                        let rowSum = 0;
+                        for(let j = 0; j < size; j++) {
+                            rowSum += Math.abs(matrix[i][j]);
+                        }
+                        if(rowSum > maxSV) maxSV = rowSum;
+                        if(rowSum < minSV) minSV = rowSum;
+                    }
+                    
+                    const cond = maxSV / minSV;
+                    document.getElementById('matrixCond').textContent = cond.toFixed(2);
+                } else {
+                    document.getElementById('matrixCond').textContent = 'N/A';
+                }
+            }
+        }
+
+        // Example modals
+        function showFinanceExample() {
+            document.getElementById('modalTitle').textContent = 'Financial Correlation Analysis';
+            
+            // Create synthetic financial data example
+            const stocks = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'JPM', 'GS', 'WMT', 'TGT', 'NFLX'];
+            const days = 252; // Trading days in a year
+            
+            // Generate random returns
+            const returns = [];
+            for(let i = 0; i < stocks.length; i++) {
+                returns[i] = [];
+                for(let j = 0; j < days; j++) {
+                    // Base return plus some correlation structure
+                    const baseReturn = Math.random() * 0.02 - 0.01;
+                    // Tech stocks more correlated
+                    const techFactor = (i < 5) ? (Math.random() * 0.01) : 0;
+                    returns[i][j] = (baseReturn + techFactor).toFixed(6);
+                }
+            }
+            
+            // Compute correlation matrix
+            const corrMatrix = [];
+            for(let i = 0; i < stocks.length; i++) {
+                corrMatrix[i] = [];
+                for(let j = 0; j < stocks.length; j++) {
+                    if(j < i) {
+                        corrMatrix[i][j] = corrMatrix[j][i]; // Symmetric
+                    } else {
+                        // Compute correlation between stock i and j
+                        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+                        for(let k = 0; k < days; k++) {
+                            const x = parseFloat(returns[i][k]);
+                            const y = parseFloat(returns[j][k]);
+                            sumX += x;
+                            sumY += y;
+                            sumXY += x * y;
+                            sumX2 += x * x;
+                            sumY2 += y * y;
+                        }
+                        
+                        const numerator = days * sumXY - sumX * sumY;
+                        const denominator = Math.sqrt((days * sumX2 - sumX * sumX) * (days * sumY2 - sumY * sumY));
+                        corrMatrix[i][j] = denominator !== 0 ? (numerator / denominator).toFixed(3) : 0;
+                    }
+                }
+            }
+            
+            // Create HTML content
+            let content = `
+                <p class="mb-4">In financial analysis, we often work with correlation matrices of stock returns. Random Matrix Theory helps us distinguish true correlations from random noise.</p>
+                
+                <h4 class="font-semibold mt-6 mb-2">Synthetic Stock Returns (10 stocks, 252 days)</h4>
+                <div class="overflow-x-auto mb-6">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-2 border">Stock</th>
+                                ${Array.from({length: 5}, (_, i) => `<th class="px-4 py-2 border">Day ${i+1}</th>`).join('')}
+                                <th class="px-4 py-2 border">...</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${stocks.map((stock, i) => `
+                                <tr>
+                                    <td class="px-4 py-2 border font-medium">${stock}</td>
+                                    ${Array.from({length: 5}, (_, j) => 
+                                        `<td class="px-4 py-2 border text-right">${returns[i][j]}</td>`
+                                    ).join('')}
+                                    <td class="px-4 py-2 border text-center">...</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h4 class="font-semibold mt-6 mb-2">Correlation Matrix</h4>
+                <div class="overflow-x-auto mb-4">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-2 border"></th>
+                                ${stocks.map(stock => 
+                                    `<th class="px-4 py-2 border">${stock}</th>`
+                                ).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${stocks.map((stock, i) => `
+                                <tr>
+                                    <td class="px-4 py-2 border font-medium">${stock}</td>
+                                    ${corrMatrix[i].map(val => 
+                                        `<td class="px-4 py-2 border text-right">${val}</td>`
+                                    ).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 mt-4">
+                    <h4 class="font-semibold text-indigo-800 mb-2">RMT Analysis</h4>
+                    <p>By comparing the eigenvalue distribution of this correlation matrix to that predicted by random matrix theory (Marchenko-Pastur law), we can identify:</p>
+                    <ul class="list-disc pl-6 mt-2">
+                        <li>Which eigenvalues likely represent true economic relationships</li>
+                        <li>Which eigenvalues are likely just noise</li>
+                        <li>The effective number of independent factors driving the market</li>
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('exampleModal').classList.remove('hidden');
+        }
+
+        function showMIMOExample() {
+            document.getElementById('modalTitle').textContent = 'MIMO Channel Matrix';
+            
+            // Create a synthetic MIMO channel matrix
+            const txAntennas = 4;
+            const rxAntennas = 4;
+            
+            const channelMatrix = [];
+            for(let i = 0; i < rxAntennas; i++) {
+                channelMatrix[i] = [];
+                for(let j = 0; j < txAntennas; j++) {
+                    // Complex channel coefficient with amplitude and phase
+                    const amplitude = (Math.random() * 0.8 + 0.2).toFixed(2);
+                    const phase = (Math.random() * 2 * Math.PI).toFixed(2);
+                    channelMatrix[i][j] = {
+                        real: (amplitude * Math.cos(phase)).toFixed(3),
+                        imag: (amplitude * Math.sin(phase)).toFixed(3)
+                    };
+                }
+            }
+            
+            // Create HTML content
+            let content = `
+                <p class="mb-4">In MIMO (Multiple Input Multiple Output) wireless systems, the channel between ${txAntennas} transmitter antennas and ${rxAntennas} receiver antennas can be represented as a complex random matrix.</p>
+                
+                <h4 class="font-semibold mt-6 mb-2">Channel Matrix H</h4>
+                <div class="overflow-x-auto mb-6">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-2 border"></th>
+                                ${Array.from({length: txAntennas}, (_, i) => 
+                                    `<th class="px-4 py-2 border">TX ${i+1}</th>`
+                                ).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Array.from({length: rxAntennas}, (_, i) => `
+                                <tr>
+                                    <td class="px-4 py-2 border font-medium">RX ${i+1}</td>
+                                    ${Array.from({length: txAntennas}, (_, j) => {
+                                        const coeff = channelMatrix[i][j];
+                                        return `<td class="px-4 py-2 border text-right">${coeff.real} ${coeff.imag >= 0 ? '+' : ''}${coeff.imag}i</td>`;
+                                    }).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                        <h4 class="font-semibold text-indigo-800 mb-2">Channel Capacity</h4>
+                        <p>The capacity of this MIMO channel depends on the singular values of H. For SNR = 20dB:</p>
+                        <p class="text-center text-xl font-mono mt-2">C ≈ ${(Math.random() * 15 + 10).toFixed(2)} bits/s/Hz</p>
+                    </div>
+                    
+                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                        <h4 class="font-semibold text-indigo-800 mb-2">Key Properties</h4>
+                        <ul class="list-disc pl-6">
+                            <li>Matrix rank: ${Math.min(txAntennas, rxAntennas)}</li>
+                            <li>Condition number: ${(Math.random() * 10 + 2).toFixed(1)}</li>
+                            <li>Frobenius norm: ${(Math.random() * 3 + 1).toFixed(2)}</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('exampleModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('exampleModal').classList.add('hidden');
+        }
+
+        // Initialize with a default matrix
+        window.onload = function() {
+            generateCustomMatrix();
+        };
+    </script>
+<p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=Hexpth/rmt-generator" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
+</html>
