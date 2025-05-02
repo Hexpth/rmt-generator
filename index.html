@@ -739,14 +739,14 @@
                 document.getElementById('matrixTrace').textContent = trace.toFixed(4);
                 
                 // Compute Frobenius norm
-                let norm = 0;
+                let f_norm = 0;
                 for(let i = 0; i < size; i++) {
                     for(let j = 0; j < size; j++) {
-                        norm += matrix[i][j] * matrix[i][j];
+                        f_norm += matrix[i][j] * matrix[i][j];
                     }
                 }
-                norm = Math.sqrt(norm);
-                document.getElementById('matrixNorm').textContent = norm.toFixed(4);
+                f_norm = Math.sqrt(norm);
+                document.getElementById('matrixNorm').textContent = f_norm.toFixed(4);
                 
                 // Compute determinant (for small matrices)
                 if (size === 1){
