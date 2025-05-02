@@ -20,9 +20,4 @@ jobs:
 
       - name: Add Hugging Face remote
         run: git remote add hf https://Hexpth:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Hexpth/rmt-generator
-
-      - name: Pull from Hugging Face Space
-        run: git pull hf main --rebase
-
-      - name: Push to Hugging Face Space
-        run: git push hf main
+  
